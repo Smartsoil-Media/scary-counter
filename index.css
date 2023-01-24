@@ -39,6 +39,8 @@ button {
     margin-bottom: 5px;
     border-radius: 5px;
     font-family: monospace;
+    touch-action: manipulation;
+
 }
 
 button:hover {
