@@ -3,6 +3,7 @@
 let count = 0
 let countEl = document.getElementById("count-el")
 let saveEl = document.getElementById("save-el")
+let resetEl = document.getElementById("reset-btn")
 
 
 console.log(countEl)
@@ -18,4 +19,9 @@ function save() {
     count = 0
     countEl.textContent = 0
 } 
+
+function reset() {
+    count = 0
+    saveEl.textContent = "Previous entries"
+}
 

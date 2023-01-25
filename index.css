@@ -40,11 +40,16 @@ button {
     border-radius: 5px;
     font-family: monospace;
     touch-action: manipulation;
+    margin-top: 5px;
 
 }
 
 button:hover {
     background: green;
+}
+
+.hover-btn:hover {
+    color: red;
 }
 
 #increment-btn {
@@ -62,6 +67,15 @@ button:hover {
 }
 
 #save-btn:active {
+    background: green;
+}
+
+#reset-btn {
+    background: black;
+    border: solid white 1px;
+}
+
+#reset-btn:active {
     background: green;
 }
 
