@@ -323,7 +323,7 @@ const WEEKS = [
   { n: 2, name: "Build", rule: "Add a set, add load and work to RIR 2. Add the end-range isometrics." },
   { n: 3, name: "Load", rule: "Hardest week. Use heavier and harder variations, RIR 1–2, and lengthened-partial finishers." },
   { n: 4, name: "Consolidate", rule: "Cut volume by about 40% but keep the loads. Make every rep sharp and fast. Your body adapts this week." },
-  { n: 5, name: "Retest", rule: "Days 29–30: rerun the baseline tests and compare." }
+  { n: 5, name: "Retest", rule: "Final two days: rerun the baseline tests and compare." }
 ];
 
 /* Exercise library. log: load | reps | time | check */
@@ -696,8 +696,10 @@ const TEMPLATES = {
   }
 };
 
+/* The week runs Tuesday to Monday so Golf Day lands on Sunday. */
 const DOW_TYPES = ["ground", "engine", "upper", "restore", "athletic", "golf", "sunday"];
-const DOW_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/* A Wednesday start gets a 6-day first week without Restore, so the first golf day is still a Sunday. */
+const WEEK1_SHORT = ["ground", "engine", "upper", "athletic", "golf", "sunday"];
 
 /* Tests. when: which sessions record it */
 const TESTS = [
@@ -726,9 +728,9 @@ const TESTS = [
   { id: "hang", n: "Dead hang", u: "s", better: "up", when: ["base", "w2", "w3", "re"],
     how: "Hang from the bar for as long as you can, with full grip and no kipping." },
   { id: "pullups", n: "Max strict pull-ups", u: "reps", better: "up", when: ["base", "re"],
-    how: "From a dead hang with the chin over the bar each rep. Record on Day 3 and Day 29." },
+    how: "From a dead hang with the chin over the bar each rep. Record on Day 3 and Retest Day." },
   { id: "cooper", n: "12-min run distance", u: "m", better: "up", when: ["base", "re"],
-    how: "Record on Days 2 and 30. Estimated VO₂max = (metres − 504.9) ÷ 44.73." },
+    how: "Record on Day 2 and the final day. Estimated VO₂max = (metres − 504.9) ÷ 44.73." },
   { id: "waist", n: "Waist at navel", u: "cm", better: "down", when: ["base", "w2", "w3", "re"],
     how: "Measure first thing in the morning, relaxed, with the tape level. Take a front and side photo on the same days." },
   { id: "weight", n: "Bodyweight", u: "kg", better: "none", when: ["base", "w2", "w3", "re"], how: "First thing in the morning." },
@@ -736,10 +738,10 @@ const TESTS = [
     how: "Only if you have a launch monitor or radar. Take the best of 5 after the warm-up." }
 ];
 const TEST_COLS = [
-  { id: "base", n: "Baseline", day: 1 },
-  { id: "w2", n: "Day 14", day: 14 },
-  { id: "w3", n: "Day 21", day: 21 },
-  { id: "re", n: "Retest", day: 29 }
+  { id: "base", n: "Baseline" },
+  { id: "w2", n: "Week 2" },
+  { id: "w3", n: "Week 3" },
+  { id: "re", n: "Retest" }
 ];
 
 /* Day-specific overrides */
@@ -750,13 +752,17 @@ const OVERRIDES = {
          { ex: "tests_link", rx: "Sit-to-rise, toe touch, hip IR (L and R), seated rotation (L and R), pelvic rotation, balance, broad jump, med-ball throw (each side), waist and weight" }]}] },
   2: { title: "Cooper Test + Hips", note: "Today the 12-minute run test replaces the intervals. Log the distance on the Tests tab under Baseline.",
        replace: { A: { label: "A · Test", id: "A", items: [{ ex: "cooper", rx: "12 min max distance", timer: { type: "count", s: 720 } }, { ex: "tests_link", rx: "Log metres under Baseline" }] } } },
-  3: { note: "Pull-ups today are a test: do 1 max set and log the reps under Baseline, then 2 sets of half that number. Log the prep dead hang as a max hold too." },
-  14: { appendBefore: "heat", add: { label: "Weekly check · 5 min", kind: "test", items: [{ ex: "tests_link", rx: "Sit-to-rise, hip IR (L and R), dead hang, waist, weight. Record in the Day 14 column." }] } },
-  21: { appendBefore: "heat", add: { label: "Weekly check · 5 min", kind: "test", items: [{ ex: "tests_link", rx: "Sit-to-rise, hip IR (L and R), dead hang, waist, weight. Record in the Day 21 column." }] } }
+  3: { note: "Pull-ups today are a test: do 1 max set and log the reps under Baseline, then 2 sets of half that number. Log the prep dead hang as a max hold too." }
+};
+
+/* Added to the last day of weeks 2 and 3 */
+const WEEK_END = {
+  2: { appendBefore: "heat", add: { label: "Weekly check · 5 min", kind: "test", items: [{ ex: "tests_link", rx: "Sit-to-rise, hip IR (L and R), dead hang, waist, weight. Record in the Week 2 column." }] } },
+  3: { appendBefore: "heat", add: { label: "Weekly check · 5 min", kind: "test", items: [{ ex: "tests_link", rx: "Sit-to-rise, hip IR (L and R), dead hang, waist, weight. Record in the Week 3 column." }] } }
 };
 
 const SPECIAL_DAYS = {
-  29: { code: "TEST", title: "Retest Day", load: "TEST", mins: 50,
+  retest: { code: "TEST", title: "Retest Day", load: "TEST", mins: 50,
     focus: "Rerun the full baseline battery to see what 4 weeks changed",
     note: "Same order, same warm-up and same conditions as Day 1. Record everything in the Retest column.",
     blocks: [
@@ -766,7 +772,7 @@ const SPECIAL_DAYS = {
         { ex: "tests_link", rx: "Sit-to-rise, toe touch, hip IR (L and R), seated rotation (L and R), pelvic rotation, balance, broad jump, med-ball throw (each side), dead hang, max pull-ups, waist and weight" } ]},
       saunaBlock([20, 20, 20, 20], ["st_hip_ir", "st_couch", "st_ham"])
     ]},
-  30: { code: "TEST", title: "Cooper Retest + Review", load: "TEST", mins: 50,
+  cooper_retest: { code: "TEST", title: "Cooper Retest + Review", load: "TEST", mins: 50,
     focus: "Aerobic retest, then review the month and set up month 2",
     note: "Run the 12-minute test, then open the Tests tab to see your changes. Bring the numbers back to Claude and we'll build month 2 from them.",
     blocks: [
@@ -808,7 +814,7 @@ const SCIENCE = [
     src: [["Laukkanen et al. 2015, JAMA Intern Med (summary)", "https://sciencedaily.com/releases/2015/02/150223122602.htm"], ["Heat, ice and stretching trial", "https://pmc.ncbi.nlm.nih.gov/articles/PMC155396"]] },
   { t: "A six-pack is ab muscle plus low body fat", lvl: "Strong",
     body: "Ab exercises don't burn the fat over the abs. Visible abs come from thicker abs (trained with load, like any muscle) and low enough body fat. Protein supplementation research found lean-mass gains levelled off at about 1.6 g of protein per kg per day.",
-    yours: "Loaded ab work three times a week (stretch crunch, hanging raise, rollout), carries and anti-rotation work, plus the protein target below. Track your waist and photos. On Day 30 we'll decide whether month 2 needs more muscle or a small calorie deficit.",
+    yours: "Loaded ab work three times a week (stretch crunch, hanging raise, rollout), carries and anti-rotation work, plus the protein target below. Track your waist and photos. At the retest we'll decide whether month 2 needs more muscle or a small calorie deficit.",
     src: [["Morton et al. 2018, BJSM", "https://experts.mcmaster.ca/display/publication763612"]] },
   { t: "Prime with your body before a round", lvl: "Moderate",
     body: "In skilled golfers, a warm-up with bodyweight potentiation exercises raised clubhead speed and carry distance. Speed sticks gave no extra benefit over the bodyweight version.",
@@ -816,7 +822,7 @@ const SCIENCE = [
     src: [["Bliss et al. 2021", "https://research.brighton.ac.uk/en/publications/field-based-and-overspeed-potentiated-warm-ups-increase-clubhead-/"]] },
   { t: "Sit-to-rise as a longevity check", lvl: "Moderate",
     body: "In a 2025 study of more than 4,000 adults, low scores on the floor sit-to-rise test went with much higher cardiovascular and natural-cause mortality. It tests strength, mobility and balance together.",
-    yours: "Measured at baseline, Day 14, Day 21 and the retest.",
+    yours: "Measured at baseline, at the end of weeks 2 and 3, and at the retest.",
     src: [["Araújo et al. 2025 (coverage)", "https://www.inquirer.com/health/fitness-test-predicts-longevity-20250627.html"]] }
 ];
 
@@ -827,7 +833,6 @@ const SCIENCE = [
   "use strict";
 
   const LS_KEY = "fairway90.v1";
-  const TOTAL_DAYS = 30;
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -837,11 +842,9 @@ const SCIENCE = [
   const midnight = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
   const fmtDate = (d) => d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
-  function defaultStart() {
-    const d = midnight(new Date());
-    const dow = (d.getDay() + 6) % 7; // 0 = Mon
-    return iso(dow === 0 ? d : addDays(d, 7 - dow));
-  }
+  /* Day 1 must be a Tuesday or Wednesday so golf lands on Sunday; any other date moves to the next Tuesday. */
+  function normStart(d) { const wd = d.getDay(); return wd === 2 || wd === 3 ? d : addDays(d, (9 - wd) % 7); }
+  function defaultStart() { return iso(normStart(midnight(new Date()))); }
 
   /* ---------------- state ---------------- */
   function freshState() {
@@ -917,18 +920,31 @@ const SCIENCE = [
   }
 
   /* ---------------- program assembly ---------------- */
-  const startDate = () => parseISO(S.settings.start || defaultStart());
+  const startDate = () => normStart(parseISO(S.settings.start || defaultStart()));
+  /* Day-by-day schedule: week, session type (or special day) and weekday column (0 = Tue). */
+  let SCHED = null, SCHED_KEY = "";
+  function sched() {
+    const key = iso(startDate());
+    if (SCHED && SCHED_KEY === key) return SCHED;
+    const w1 = startDate().getDay() === 3 ? WEEK1_SHORT : DOW_TYPES;
+    const days = [null];
+    w1.forEach((t, i) => days.push({ week: 1, type: t, slot: i + 7 - w1.length }));
+    for (let w = 2; w <= 4; w++) DOW_TYPES.forEach((t, i) => days.push({ week: w, type: t, slot: i, weekEnd: i === 6 ? w : 0 }));
+    days.push({ week: 5, special: "retest", slot: 0 }, { week: 5, special: "cooper_retest", slot: 1 });
+    SCHED = days; SCHED_KEY = key;
+    return days;
+  }
+  const totalDays = () => sched().length - 1;
   function todayIndex() { return Math.round((midnight(new Date()) - startDate()) / 864e5) + 1; }
-  function currentDay() { return Math.min(TOTAL_DAYS, Math.max(1, todayIndex())); }
-  const weekOf = (n) => (n <= 28 ? Math.ceil(n / 7) : 5);
+  function currentDay() { return Math.min(totalDays(), Math.max(1, todayIndex())); }
+  const weekOf = (n) => sched()[n].week;
   const pick = (v, wi) => (Array.isArray(v) ? v[Math.min(wi, v.length - 1)] : v);
   const clone = (o) => JSON.parse(JSON.stringify(o));
 
   function buildDay(n) {
-    const week = weekOf(n), wi = Math.min(week, 4) - 1, dow = (n - 1) % 7;
-    let src, ov = OVERRIDES[n] || {};
-    if (SPECIAL_DAYS[n]) src = clone(SPECIAL_DAYS[n]);
-    else src = clone(TEMPLATES[DOW_TYPES[dow]]);
+    const info = sched()[n], week = info.week, wi = Math.min(week, 4) - 1, dow = info.slot;
+    const ov = Object.assign({}, OVERRIDES[n] || {}, info.weekEnd ? WEEK_END[info.weekEnd] : {});
+    const src = clone(info.special ? SPECIAL_DAYS[info.special] : TEMPLATES[info.type]);
     let blocks = src.blocks;
     if (ov.removeIds) blocks = blocks.filter((b) => !ov.removeIds.includes(b.id));
     if (ov.replace) blocks = blocks.map((b) => (b.id && ov.replace[b.id] ? clone(ov.replace[b.id]) : b));
@@ -1095,13 +1111,13 @@ const SCIENCE = [
     let h = "";
     if (idx < 1 && n === 1) {
       h += '<div class="banner"><b>Starts ' + esc(fmtDate(startDate())) + "</b>Day 1 is a test day, so read through it now. You can change the start date in Setup.</div>";
-    } else if (idx > TOTAL_DAYS && n === TOTAL_DAYS) {
+    } else if (idx > totalDays() && n === totalDays()) {
       h += '<div class="banner"><b>Month 1 complete</b>Check the Tests tab, then bring your numbers back to Claude to build month 2.</div>';
     }
     h += '<section class="card"><div class="dayhead">' +
-      '<div class="dayline"><div class="daynum">DAY <b>' + n + "</b> / " + TOTAL_DAYS + "</div>" +
+      '<div class="dayline"><div class="daynum">DAY <b>' + n + "</b> / " + totalDays() + "</div>" +
       '<div class="nav-arrows"><button data-act="go-day" data-day="' + (n - 1) + '" aria-label="Previous day"' + (n <= 1 ? " disabled" : "") + ">‹</button>" +
-      '<button data-act="go-day" data-day="' + (n + 1) + '" aria-label="Next day"' + (n >= TOTAL_DAYS ? " disabled" : "") + ">›</button></div></div>" +
+      '<button data-act="go-day" data-day="' + (n + 1) + '" aria-label="Next day"' + (n >= totalDays() ? " disabled" : "") + ">›</button></div></div>" +
       '<div class="daymeta"><span class="chip ' + (LOAD_CLASS[day.load] || "") + '">' + esc(day.load) + '</span><span class="chip">Week ' + day.week + " · " + esc(wk.name) + '</span><span class="chip">' + esc(day.date.toLocaleDateString(undefined, { weekday: "short" })) + " " + esc(day.date.getDate() + "/" + (day.date.getMonth() + 1)) + '</span><span class="chip">≈' + day.mins + " min</span></div>" +
       '<h1 class="daytitle">' + esc(day.title) + "</h1>" +
       '<div class="dayfocus">' + esc(day.focus) + "</div>" +
@@ -1189,20 +1205,21 @@ const SCIENCE = [
 
   function viewPlan() {
     const idx = todayIndex();
-    let done = 0; for (let n = 1; n <= TOTAL_DAYS; n++) if (S.logs[n] && S.logs[n].done) done++;
-    let streak = 0; for (let n = Math.min(idx, TOTAL_DAYS); n >= 1; n--) { if (S.logs[n] && S.logs[n].done) streak++; else if (n !== idx) break; }
+    let done = 0; for (let n = 1; n <= totalDays(); n++) if (S.logs[n] && S.logs[n].done) done++;
+    let streak = 0; for (let n = Math.min(idx, totalDays()); n >= 1; n--) { if (S.logs[n] && S.logs[n].done) streak++; else if (n !== idx) break; }
     let h = '<section class="card"><div class="stats">' +
       '<div class="stat"><b>' + done + "</b><span>Sessions done</span></div>" +
       '<div class="stat"><b>' + streak + "</b><span>Day streak</span></div>" +
-      '<div class="stat"><b>' + (idx < 1 ? "–" : Math.min(idx, TOTAL_DAYS)) + "</b><span>Today's day</span></div></div></section>";
+      '<div class="stat"><b>' + (idx < 1 ? "–" : Math.min(idx, totalDays())) + "</b><span>Today's day</span></div></div></section>";
     h += '<section class="card"><div class="rowhead"><span>Month 1 scorecard</span><span class="count">starts ' + esc(fmtDate(startDate())) + "</span></div>";
-    h += '<table class="score"><thead><tr><th class="wk"><span class="sr">Week</span></th>' + [0, 1, 2, 3, 4, 5, 6].map((i) => "<th>" + esc(addDays(startDate(), i).toLocaleDateString(undefined, { weekday: "short" })) + "</th>").join("") + "</tr></thead><tbody>";
+    const sc = sched(), col0 = addDays(startDate(), -sc[1].slot);
+    h += '<table class="score"><thead><tr><th class="wk"><span class="sr">Week</span></th>' + [0, 1, 2, 3, 4, 5, 6].map((i) => "<th>" + esc(addDays(col0, i).toLocaleDateString(undefined, { weekday: "short" })) + "</th>").join("") + "</tr></thead><tbody>";
     for (let w = 1; w <= 5; w++) {
       h += '<tr><th class="wk" scope="row">W' + w + "<span>" + esc(WEEKS[w - 1].name) + "</span></th>";
       for (let d = 0; d < 7; d++) {
-        const n = (w - 1) * 7 + d + 1;
-        if (n > TOTAL_DAYS) { h += '<td><span class="cell empty" aria-hidden="true"></span></td>'; continue; }
-        const code = SPECIAL_DAYS[n] ? SPECIAL_DAYS[n].code : TEMPLATES[DOW_TYPES[d]].code;
+        const n = sc.findIndex((x) => x && x.week === w && x.slot === d);
+        if (n < 1) { h += '<td><span class="cell empty" aria-hidden="true"></span></td>'; continue; }
+        const code = sc[n].special ? SPECIAL_DAYS[sc[n].special].code : TEMPLATES[sc[n].type].code;
         const st = dayStatus(n);
         h += '<td><a class="cell ' + st + (n === idx ? " today" : "") + '" href="#day-' + n + '" aria-label="Day ' + n + " " + esc(code) + (st ? " " + st : "") + '"><b>' + n + "</b><small>" + esc(code) + "</small></a></td>";
       }
@@ -1219,13 +1236,13 @@ const SCIENCE = [
     return h;
   }
 
-  function colForDay(n) { if (n <= 7) return "base"; if (n <= 14) return "w2"; if (n <= 21) return "w3"; return "re"; }
+  function colForDay(n) { return ["base", "w2", "w3"][weekOf(n) - 1] || "re"; }
   function fmtNum(v) { if (v === "" || v == null || isNaN(v)) return "–"; const x = Number(v); return Math.abs(x) >= 100 ? String(Math.round(x)) : String(Math.round(x * 10) / 10); }
   function viewTests() {
-    const col = ui.testCol || colForDay(Math.max(1, Math.min(todayIndex(), TOTAL_DAYS)));
+    const col = ui.testCol || colForDay(Math.max(1, Math.min(todayIndex(), totalDays())));
     const vals = (S.tests[col] = S.tests[col] || {});
     let h = '<section class="card card-pad" style="display:grid;gap:10px"><h2 style="font-size:24px;text-transform:uppercase">Tests</h2>' +
-      '<p class="small muted" style="margin:0">Day 1–3 baseline, quick checks on Days 14 and 21, and the full retest on Days 29–30. Same warm-up, same time of day.</p>' +
+      '<p class="small muted" style="margin:0">Days 1–3 baseline, quick checks at the end of weeks 2 and 3, and the full retest on the final two days. Same warm-up, same time of day.</p>' +
       '<div class="seg" role="group" aria-label="Test session">' + TEST_COLS.map((c) => '<button data-act="test-col" data-col="' + c.id + '" aria-pressed="' + (c.id === col) + '">' + esc(c.n) + "</button>").join("") + "</div></section>";
     h += '<section class="card"><div class="rowhead"><span>Record · ' + esc(TEST_COLS.find((c) => c.id === col).n) + '</span><span class="count">' + Object.keys(vals).filter((k) => vals[k] !== "").length + " logged</span></div>";
     TESTS.filter((t) => t.when.includes(col)).forEach((t) => {
@@ -1289,10 +1306,10 @@ const SCIENCE = [
   function viewSetup() {
     const st = S.settings;
     const sd = startDate();
-    const notMon = ((sd.getDay() + 6) % 7) !== 0;
+    const moved = st.start && iso(sd) !== st.start;
     let h = '<section class="card"><div class="rowhead"><span>Setup</span></div><div class="form">' +
       '<label for="start">Day 1 date<input class="field" type="date" id="start" data-act="start" value="' + esc(st.start) + '"><span class="hint">' +
-      (notMon ? "Heads up: the week is laid out Monday to Sunday with golf on the weekend, so Day 1 works best on a Monday." : "Day 1 is a Monday, so golf lands on the weekends.") + "</span></label>" +
+      (moved ? "The week runs Tuesday to Monday with golf on Sunday, so Day 1 has moved to " + esc(fmtDate(sd)) + ". Pick a Tuesday, or a Wednesday for a 6-day first week." : "The week runs Tuesday to Monday with golf on Sunday. Day 1 can be a Tuesday, or a Wednesday for a 6-day first week without Restore.") + "</span></label>" +
       '<label for="bw2">Bodyweight (kg)<input class="field" id="bw2" inputmode="decimal" data-act="bw" value="' + esc(st.bw || "") + '"><span class="hint">Used for your protein target.</span></label>' +
       '<div class="toggle"><label for="autorest" style="font-weight:600">Start the rest timer when I tick a set</label><input type="checkbox" id="autorest" data-act="autorest"' + (st.autoRest ? " checked" : "") + "></div>" +
       '<div class="toggle"><label for="sound" style="font-weight:600">Timer beeps</label><input type="checkbox" id="sound" data-act="sound"' + (st.sound ? " checked" : "") + "></div>" +
@@ -1317,7 +1334,7 @@ const SCIENCE = [
   /* ---------------- router & render ---------------- */
   function route() {
     const hsh = (location.hash || "").replace("#", "");
-    if (/^day-\d+$/.test(hsh)) return { tab: "today", day: Math.min(TOTAL_DAYS, Math.max(1, parseInt(hsh.slice(4), 10))) };
+    if (/^day-\d+$/.test(hsh)) return { tab: "today", day: Math.min(totalDays(), Math.max(1, parseInt(hsh.slice(4), 10))) };
     if (["plan", "tests", "science", "setup"].includes(hsh)) return { tab: hsh };
     return { tab: "today", day: currentDay() };
   }
