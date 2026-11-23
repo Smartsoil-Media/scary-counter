@@ -673,14 +673,10 @@ const TEMPLATES = {
   },
 
   sunday: {
-    code: "G/R", title: "Golf or Long Reset", load: "PLAY / LOW", mins: 45,
-    focus: "If you're playing, use the Golf Day routine. If not, do this mobility session and a long sauna.",
+    code: "RS", title: "Long Reset", load: "LOW", mins: 45,
+    focus: "Recover from Sunday's round with an easy mobility session and a long sauna",
     blocks: [
-      { label: "Option A · Golf", items: [
-        { ex: "prog_swings", rx: "Run the full Golf Day primer before the round" },
-        { ex: "golf_round", rx: "Walk it if you can" }
-      ]},
-      { label: "Option B · Long reset · 25 min", items: [
+      { label: "Long reset · 25 min", items: [
         { ex: "hip_cars", rx: "3 each side" },
         { ex: "ninety_switch", rx: "10 each side" },
         { ex: "hip_pails", rx: ["1 round on the left, 10 s press / 10 s lift", "2 rounds on the left, 15 s", "2 rounds on the left, 20 s", "1 round each side, 20 s"], timer: { type: "count", s: 120 } },
@@ -1227,7 +1223,7 @@ const SCIENCE = [
     }
     h += "</tbody></table>";
     h += '<div class="card-pad"><div class="legend"><span><i style="background:var(--accent)"></i>Done</span><span><i style="box-shadow:inset 0 -3px 0 var(--accent)"></i>Started</span><span><i style="outline:2px solid var(--flag);outline-offset:-2px"></i>Today</span></div>' +
-      '<p class="small muted" style="margin:10px 0 0">GF Ground Force · EN Engine · UP Upper Power · RR Restore · AP Athletic Prep · GOLF · G/R Golf or Reset</p></div></section>';
+      '<p class="small muted" style="margin:10px 0 0">GF Ground Force · EN Engine · UP Upper Power · RR Restore · AP Athletic Prep · GOLF · RS Long Reset</p></div></section>';
     h += '<section class="card"><div class="rowhead"><span>The 90 days</span></div><div>' +
       PHASES.map((p) => '<div class="phase ' + p.status + '"><div class="days">Days<br>' + esc(p.days) + "</div><div><h3>" + esc(p.name) + (p.status === "active" ? ' <span class="chip low">Now</span>' : "") + "</h3><p>" + esc(p.text) + "</p></div></div>").join("") +
       "</div></section>";
