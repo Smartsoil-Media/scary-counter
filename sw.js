@@ -1,5 +1,5 @@
 /* Fairway 90 service worker: offline app shell + font caching. Bump CACHE on each release. */
-const CACHE = "fairway90-m1-v3";
+const CACHE = "fairway90-m1-v4";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
